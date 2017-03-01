@@ -180,6 +180,7 @@ install(){
             create_macvlan_network &&
             create_bridge_network &&
 
+            echo ' ' &&
             printf "Enter Host IP Address: " &&
             read ip_addr &&
             sed -i "s/\(HOST_IP_ADDR\s=\s\).*/\1'$ip_addr'/g" $project_dir/docker_box/docker_box/settings.py &&

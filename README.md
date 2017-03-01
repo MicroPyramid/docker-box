@@ -20,7 +20,7 @@ Currently supports:
 
 Run:
 ```sh
-$ sudo curl -sSL https://raw.githubusercontent.com/MicroPyramid/docker-box/master/install.sh | bash
+$ sudo curl -o /tmp/install.sh https://raw.githubusercontent.com/MicroPyramid/docker-box/master/install.sh && sudo chmod +x /tmp/install.sh && sudo bash /tmp/install.sh
 ```
 
 License
