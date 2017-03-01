@@ -1,0 +1,551 @@
+{% extends "site_base.html" %}
+{% load paginate %}
+{% load staticfiles %}
+{% load sizes %}
+{% block title %} {{ container.Name|remove_slash }}'s Dashboard {% endblock %}
+{% block bodycontent %}
+    <link href="{% static 'css/xterm.css' %}" rel="stylesheet">
+    <br/>
+    <div class="row marl main_container">
+      <div class="container">
+        <div class="row">
+
+        <div class="col-md-6">
+        <h4>
+            Container Id/Name : {{ container.Id|slice:"12" }} / {{ container.Name|remove_slash }}
+        </h4>
+        </div>
+        <div class='col-md-6 icon-wrapper'>
+            {% ifequal container.State.Status "running" %}
+            <a class="btn2 tooltip2 pull-right" href="{% url 'docker_box:backup_container' container_id=container_id %}"
+                data-placement="bottom" title='Backup'>
+                <i class="fa fa-hdd-o fa-1x custom-icon" aria-hidden="true"></i>
+            </a>
+            <a class='btn2 pull-right tooltip2' title="SSH Access" data-placement='bottom'
+               href="{% url 'docker_box:ssh_access' container_id=container_id %}">
+               <i class="fa fa-key fa-1x custom-icon"></i>
+            </a>
+            <a class="btn2 pull-right tooltip2" id="stop-this-container" href="{% url 'docker_box:container-list' %}" data-placement='bottom' title="Stop">
+                <i class="fa fa-stop fa-1x custom-icon" aria-hidden="true"></i>
+            </a>
+            {% else %}
+            	<a class="btn2 pull-right tooltip2" href="{% url 'docker_box:backup_container' container_id=container_id %}" data-placement='bottom' title="Backup">
+                    <i class="fa fa-hdd-o fa-1x custom-icon" aria-hidden="true"></i>
+                </a>
+                <a class='btn2 tooltip2 pull-right' data-placement='bottom' title="SSH Access"
+                   href="{% url 'docker_box:ssh_access' container_id=container_id %}">
+                   <i class="fa fa-key fa-1x custom-icon"></i>
+                </a>
+                <a class="btn2 tooltip2 pull-right" id="start-this-container" href="{% url 'docker_box:container-details' container_id=container_id %}"
+                    data-placement='bottom' title="Start">
+                    <i class="fa fa-play-circle fa-1x custom-icon" aria-hidden="true"></i>
+                </a>
+            {% endifequal %}
+        </div>
+        <br/><br/><br/><br/><br/>
+          <div class="col-md-12">
+            <ul class="nav nav-tabs" role="tablist">
+              <li class="active" id="overview_button"><a class='a_cd' href="#overview" aria-controls="Overview" role="tab" data-toggle="tab">STATS</a></li>
+              <li id="images_button"><a href="#backup_images" class='a_cd' aria-controls="BackupImages" role="tab" data-toggle="tab">BACKUP IMAGES</a></li>
+              <li id="runprocesses_button"><a href="#running_processes" class='a_cd' aria-controls="Running Processes" role="tab" data-toggle="tab">RUNNING PROCESSES</a></li>
+              <li id="filechanges_button"><a href="#file_changes" aria-controls="File Changes" class='a_cd' role="tab" data-toggle="tab">FILE CHANGES</a></li>
+              <li id="terminal_button"><a href="#terminal_changes" aria-controls="Terminal" role="tab" class='a_cd' data-toggle="tab">TERMINAL</a></li>
+            </ul>
+            <br/>
+            <div class="tab-content">
+              <div class="tab-pane active category-section row chart_row" id="overview">
+                {% ifequal container.State.Status "running" %}
+                <div class='stats'>
+                  <div class="col-md-6 chart_col">
+                    <div class="panel panel-default">
+                      <div class="panel-heading">CPU
+                        <br/>
+                        <div id="chart_div" style="width: 100%; height: 100%;"></div>
+                      </div>
+                      <div class="panel-content">
+                        <div id="curve_chart1" style="width:90%"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 chart_col">
+                    <div class="panel panel-default">
+                      <div class="panel-heading">Memory
+                        <br/>
+                        <div id="mem_div" style="width: 100%; height: 100%;"></div>
+                      </div>
+                      <div class="panel-content">
+                        <div id="curve_chart2" style="width:90%"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 chart_col">
+                    <div class="panel panel-default">
+                      <div class="panel-heading">Network - Download
+                        <br/>
+                        <div id="nud" style="width: 100%; height: 100%;"></div>
+                      </div>
+                      <div class="panel-content">
+                        <div id="curve_chart"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 chart_col">
+                    <div class="panel panel-default">
+                      <div class="panel-heading">Network - Upload
+                        <br/>
+                        <div id="nuu" style="width: 100%; height: 100%;"></div>
+                      </div>
+                      <div class="panel-content">
+                        <div id="curve_chart"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+		            {% endifequal %}
+              </div>
+              <div class="col-md-12 tab-pane fade in" id="terminal_changes">
+                <div class="col-md-12 chart_col">
+                  <div id='shell' style='display: none;'>
+                    <h3 class="heading">Terminal(#!/bin/bash)</h3>
+                      <title>term.js</title>
+                      <style>
+                        html {
+                          background: #555;
+                        }
+
+                        h1 {
+                          margin-bottom: 30px;
+                          font: 30px/1.5 sans-serif;
+                        }
+                      </style>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-12 tab-pane fade in" id="backup_images">
+                <div class="table_row">
+                  <div class="table-responsive">
+                    <table class="table ">
+                      <thead>
+                        <tr>
+                          <th width="20%">Ttile</th>
+                          <th width="10%">Tag</th>
+                          <th width="10%">Image ID</th>
+                          <th width="15%">Size</th>
+                          <th width="20%">Date</th>
+                          <th width="8%">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% if per_page %}
+                          {% paginate per_page images %}
+                        {% else %}
+                          {% paginate 5 images %}
+                        {% endif %}
+                        {% for image in images %}
+                        <tr>
+                          <td>
+                            <a href="{% url 'docker_box:launch-image' name=image.name %}" title="Launch a Container from this Image?">{{ image.name }}</a>
+                          </td>
+                          <td>{{ image.tag }}</td>
+                          <td>{{ image.image_id|cut:'sha256:'|slice:'12' }}</td>
+                          <td>{{ image.details.size|floatformat:2 }}MB</td>
+                          <td>{{ image.details.created }}</td>
+                          <td class="actions">
+                            <!-- <a href="#edit" class="edit"><i class="fa fa-edit"></i></a> -->
+                            <a title="Remove This Image?" href="{% url 'docker_box:remove_image' name=image.name %}" class="trash remove-this-image"><i class="fa fa-trash"></i></a>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                    {% ifequal images|length 0 %}
+                      <div class="row text-center">
+                        <h4>No images Found</h4>
+                      </div>
+                      <div class="row text-center">
+                        {% show_pages %}
+                      </div>
+                    {% endifequal %}
+                  </div>
+                </div>
+              </div>
+              {% ifequal container.State.Status "running" %}
+              <div class="col-md-12 tab-pane fade in" id="running_processes">
+                <br/> 
+                <div class="table_row">
+                  <div class="table-responsive">
+                    <table class="table ">
+                      <thead>
+                        <tr class='title_class'>
+                        </tr>
+                      </thead>
+                      <tbody class='processes_class'>
+                        {% if per_page %}
+                          {% paginate per_page images %}
+                        {% else %}
+                          {% paginate 5 images %}
+                        {% endif %}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="row text-center">
+                    {% show_pages %}
+                  </div>
+                </div>
+              </div>
+              {% endifequal %}
+              <div class="col-md-12 tab-pane fade in" id="file_changes">
+                <br/> 
+          			  <ul class="nav nav-tabs" id="myTab">
+          			    <li class='active'><a data-target="#modified" data-toggle="tab">Modified</a></li>
+          			    <li><a data-target="#added" data-toggle="tab">Added</a></li>
+          			    <li><a data-target="#deleted" data-toggle="tab">Deleted</a></li>
+          			  </ul>
+          			  <div class="tab-content">
+          			    <div class="tab-pane active" id="modified">
+                      <br/>
+                      <ol type='list-style-type:none' class='modified_class'></ol>  
+                      <a href={% url 'docker_box:diff' container_id=container_id total=1 %}>Full List..</a>
+          			    </div>
+          			    <div class="tab-pane" id="added">
+                      <br/>
+                      <ol type='list-style-type:none' class='added_class'></ol>  
+                      <a href={% url 'docker_box:diff' container_id=container_id total=1 %}>Full List..</a>
+                    </div>
+          			    <div class="tab-pane" id="deleted">
+                      <br/>
+                      <ol type='list-style-type:none' class='deleted_class'></ol>  
+                      <a href={% url 'docker_box:diff' container_id=container_id total=1 %}>Full List..</a>
+                    </div>
+          			  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- main_container ends here -->
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript" src="{% static 'js/xterm.js' %}"></script>
+<script type="text/javascript">
+//function restart_stats(){
+//  $req.abort();
+//  $('#shell').css('display', 'none');
+//  $('.terminal').remove();
+//  if (window.socket){
+//      socket.close();
+//  }
+//  run_charts();
+//  $('.stats').show();
+//}
+//$('#stats_icon').on('click', function(e){
+//  e.preventDefault();
+//  restart_stats();
+//});
+$('body').on('click', '#stop-this-container', function (e) {
+    e.preventDefault();
+    $('.loader').show();
+    $.get("{% url 'docker_box:stop-container' container_id=container.Id|slice:"12" %}", function (data, status, xhr) {
+        if (status == 'success') {
+            if (data['success'] == 'stopped' || data['success'] == 'Already Stopped') {
+                window.location = '{% url "docker_box:container-list" %}';
+            }
+            else {
+                alert(data['ERROR'])
+                window.location = '';
+            }
+        }
+    });
+});
+
+$('body').on('click', '#start-this-container', function (e) {
+    e.preventDefault();
+    $('.loader').show();
+    $.get("{% url 'docker_box:start-container' container_id=container.Id|slice:"12" %}", function (data, status, xhr) {
+        if (data['success'] == 'started' || data['success'] == 'Already Started') {
+            window.location = '';
+        }
+        else {
+            alert(data['ERROR'])
+            window.location = '';
+        }
+    });
+});
+
+{% ifequal container.State.Status "running" %}
+function run_charts(){
+    google.charts.load('current', {packages: ['corechart', 'line']});
+    google.charts.setOnLoadCallback(initialize_charts);
+    function initialize_charts() {
+        container_stats();
+    }
+
+    function container_stats() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('number', '');
+        data.addColumn('number', 'CPU(%)');
+
+        var options = {
+            hAxis: {
+                title: 'Time',
+                titleTextStyle:{
+                    italic: false
+                }
+            },
+            vAxis: {
+                title: 'CPU(%)',
+                titleTextStyle:{
+                    italic: false
+                }
+            },
+            backgroundColor: '#ffffff'
+        };
+        var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+        var memChart = new google.visualization.PieChart(document.getElementById('mem_div'));
+        //NET STATS
+        var net_data = new google.visualization.DataTable();
+        net_data.addColumn('number', '');
+        net_data.addColumn('number', 'Download');
+        var net_chart = new google.visualization.LineChart(document.getElementById('nud'));
+        //UPLOAD
+        var netu_data = new google.visualization.DataTable();
+        netu_data.addColumn('number', '');
+        netu_data.addColumn('number', 'Upload');
+        var netu_chart = new google.visualization.LineChart(document.getElementById('nuu'));
+        //NET STATS END
+        $req = new XMLHttpRequest();
+        var ok = 1
+            $req.open('GET', "{% url 'docker_box:container_stats' container_id=container.Id|slice:"12" %}");
+        $req.onreadystatechange = function (aEvt) {
+            if ($req.readyState == 3) {
+                if ($req.status == 200) {
+                    $response = $req.responseText
+                    $response = $response.substr(0, $response.length - 1)
+                    $response = JSON.parse("[" + $response + "]")
+                    $cpu = $response[$response.length - 1][0].cpu
+                    $cpu = $cpu.substr(0, $cpu.length - 1)
+                    $mem = $response[$response.length - 1][0].memory
+                    $mem = $mem.substr(0, $mem.length - 1)
+                    $memtotal = $response[$response.length - 1][0].memTotal
+                    var $cpu = [ok, parseFloat($cpu)];
+                    var memData = google.visualization.arrayToDataTable([
+                        ['Unused', 'Used'],
+                        ['Unused', parseFloat($memtotal)],
+                        ['Used', parseFloat($mem)],
+                    ]);
+                    var mem_options = {
+                        sliceVisibilityThreshold: 0.0001,
+                        pieSliceText: 'value',
+                        tooltip: {
+                            text: 'value'
+                        }
+                    };
+                    memChart.draw(memData, mem_options);
+                    data.addRows([$cpu])
+                    chart.draw(data, options)
+                    //NET STATS
+                    var net_options = {
+                        hAxis: {
+                            title: 'Download',
+                            titleTextStyle:{
+                                italic: false
+                            }
+                        },
+                        vAxis: {
+                            title: 'Download ' + $response[$response.length - 1][0].netDowUnit,
+                            titleTextStyle:{
+                                italic: false
+                            }
+                        },
+                        backgroundColor: '#ffffff'
+                    };
+                    net_data.addRows([[ok, parseFloat($response[$response.length - 1][0].netDow)]])
+                    net_chart.draw(net_data, net_options)
+
+                    var netu_options = {
+                        hAxis: {
+                            title: 'Upload',
+                        titleTextStyle:{
+                            italic: false
+                        }
+                        },
+                        vAxis: {
+                            title: 'Upload ' + $response[$response.length - 1][0].netUpUnit,
+                            titleTextStyle:{
+                                italic: false
+                            }
+                        },
+                        backgroundColor: '#ffffff'
+                    };
+                    netu_data.addRows([[ok, parseFloat($response[$response.length - 1][0].netUp)]])
+                    netu_chart.draw(netu_data, netu_options)
+                    ok++
+                    //NET STATS ENDS
+                }
+                else {
+                    alert("Error loading page\n");
+                    window.location = ''
+                }
+            }
+        };
+        $req.send();
+    }
+}
+
+run_charts();
+
+$('#overview_button').click(function(){
+  run_charts();
+  topstop();
+  diffstop();
+  socket.close();
+});
+
+function top_func(){
+    $.ajax({
+        type: "POST",
+        url: "{% url 'docker_box:top' container_id=container_id %}",
+        success:function(response){
+            var title_str = ''
+            var processes_str = ''
+            for (i=0; i<response.Titles.length; i++) {
+                title_str += '<th>'+response.Titles[i]+'</th>';
+            }
+            for (j=0; j<response.Processes.length; j++) {
+                processes_str += '<tr>';
+                for (k=0; k<response.Processes[j].length; k++) {
+                    processes_str += '<td>'+response.Processes[j][k]+'</td>';
+                }
+                processes_str += '</tr>';
+            }
+            $('.title_class').html(title_str);
+            $('.processes_class').html(processes_str);
+        }
+    })
+}
+
+var myTop;
+
+function topp(){
+  myTop = setInterval(function(){
+    top_func();
+  }, 5000)
+}
+
+function topstop(){
+  if(typeof myTop !== undefined) {
+    clearInterval(myTop);
+  }
+}
+
+$('#runprocesses_button').click(function(){
+  topp();
+  diffstop();
+  $req.abort();
+  socket.close();
+});
+  
+function diff_func(){
+    $.ajax({
+        type: "POST",
+        url: "{% url 'docker_box:diff' container_id=container_id total=0 %}",
+        success:function(response){
+            var modified_str = ''
+            var added_str = ''
+            var deleted_str = ''
+            for(i=0; i<response.modified.length; i++){
+                modified_str += '<li>'+response.modified[i]+'</li>'            
+            }
+            for(i=0; i<response.added.length; i++){
+                added_str += '<li>'+response.added[i]+'</li>'            
+            }
+            for(i=0; i<response.deleted.length; i++){
+                deleted_str += '<li>'+response.deleted[i]+'</li>'            
+            }
+			$('.modified_class').html(modified_str)
+			$('.added_class').html(added_str)
+			$('.deleted_class').html(deleted_str)
+        }
+    })
+}
+
+var myDiff;
+
+function diff(){
+  myDiff = setInterval(function(){
+    diff_func();
+  }, 5000)
+}
+
+function diffstop(){
+  if(typeof myDiff !== undefined) {
+    clearInterval(myDiff);    
+  }
+}
+
+$('#filechanges_button').click(function(){
+  diff();
+  topstop();
+  $req.abort();
+  socket.close();
+});
+
+function terminal_func(){
+  $('#shell').css('display', 'block');	
+  $.ajax({
+    url: '{% url "docker_box:terminal" container_id %}',
+    type: 'get',
+    success: function(data) {
+    port = data.port
+    container_id = data.container_id
+      var ps1 = 'druuu # '
+        var url = "ws://"+location.hostname+":"+port+"/exec/"+container_id;
+        socket = new WebSocket(url);
+      term = new Terminal({
+        cols: 80,
+        rows: 24,
+        useStyle: true,
+        screenKeys: true,
+        cursorBlink: true
+      });
+
+      term.on('data', function(data) {
+        socket.send(data);
+      });
+
+      term.on('title', function(title) {
+        document.title = title;
+      });
+      $('#shell').html('')
+      term.open(document.getElementById('shell'));
+      socket.onmessage = function(message){
+        term.write(message.data);
+        if(message.data.match("exit\r\n$")){
+          socket.send('\r\n');
+          socket.send('\r\n');
+        }
+      }
+    }
+  });
+}
+
+terminal_func();
+
+var socket;
+
+$('#terminal_button').click(function(){
+  terminal_func();
+  $req.abort();
+  topstop();
+  diffstop();
+});
+
+{% endifequal %}
+$(document).ready(function(){
+        $("a").tooltip();
+});
+</script>
+{% endblock %}
+

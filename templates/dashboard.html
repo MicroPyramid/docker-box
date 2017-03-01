@@ -1,0 +1,258 @@
+{% extends "site_base.html" %}
+{% load staticfiles %}
+{% block title %} Dockerbox Dashboard {% endblock %}
+{% block bodycontent %}
+<!-- main_container starts here -->
+<div class="row marl main_container">
+    <div class="container">
+        <ul class="ul_host">
+            <li class='li_host'>HostName: {{ host_name }}</li>
+            <li class='li_host'>Kernel: {{ kernel }}</li>
+            <li class='li_host'>IP Address: {{ ip_addr }}</li>
+        </ul>
+        <div class="row chart_row">
+            <div class="col-md-6 chart_col">
+                <div class="panel panel-default">
+                    <div class="panel-heading">CPU
+                        <br/>
+                        <div id="chart_div" style="width: 100%; height: 100%;"></div>
+                    </div>
+                    <div class="panel-content">
+                        <div id="curve_chart1" style="width:90%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 chart_col">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Ram Usage (GB)
+                        <br/>
+                        <div id="mem_div" style="width: 100%; height: 100%;"></div>
+                    </div>
+                    <div class="panel-content">
+                        <div id="curve_chart2" style="width:90%"></div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="col-md-6 chart_col">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Network Usage - Download
+                        <br/>
+                        <div id="nud" style="width: 100%; height: 100%;"></div>
+                    </div>
+                    <div class="panel-content">
+                        <div id="curve_chart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 chart_col">
+                <div class="panel panel-default">
+
+                    <div class="panel-heading">Network Usage - Upload
+                        <br/>
+                        <div id="nuu" style="width: 100%; height: 100%;"></div>
+                    </div>
+                    <div class="panel-content">
+                        <div id="curve_chart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 chart_col">
+                <div class="panel panel-default">
+
+                    <div class="panel-heading">Disk Usage (GB)
+                        <br/>
+                        <div id="disk_div" style="width: 100%; height: 100%;"></div>
+                    </div>
+                    <div class="panel-content">
+                        <div id="piechart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 chart_col">
+
+            </div>
+        </div>
+    </div>
+    <!-- main_container ends here -->
+    {% endblock %}
+    {% block extra_js %}
+    <script type="text/javascript">
+        google.charts.load('current', {packages: ['corechart', 'line']});
+        google.charts.setOnLoadCallback(initialize_charts);
+        function initialize_charts() {
+            container_stats();
+        }
+
+        function container_stats() {
+            //CPU STATS
+            var data = new google.visualization.DataTable();
+            data.addColumn('number', '');
+            data.addColumn('number', 'CPU(%)');
+            var options = {
+                hAxis: {
+                    title: 'Time',
+                    titleTextStyle:{
+                        italic: false
+                    }
+                },
+                vAxis: {
+                    title: 'CPU(%)',
+                    titleTextStyle:{
+                        italic: false
+                    }
+                },
+                backgroundColor: '#ffffff'
+            };
+            var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+            //CPU STATS ENDS
+            var memChart = new google.visualization.PieChart(document.getElementById('mem_div'));
+            var memChart2 = new google.visualization.PieChart(document.getElementById('disk_div'));
+            //NET STATS DONWLOAD
+            var netData = new google.visualization.DataTable();
+            var net_options = {
+                hAxis: {
+                    title: 'Time',
+                    titleTextStyle:{
+                        italic: false
+                    }
+                },
+                vAxis: {
+                    title: 'Downloaded(KB)',
+                    titleTextStyle:{
+                        italic: false
+                    }
+                },
+                backgroundColor: '#ffffff'
+            };
+            var net_chart = new google.visualization.LineChart(document.getElementById('nud'));
+            //NET STATS DONWLOAD END
+            //NET STATS UPLOAD
+            var netData2 = new google.visualization.DataTable();
+            var net_options2 = {
+                hAxis: {
+                    title: 'Time',
+                    titleTextStyle:{
+                        italic: false
+                    }
+                },
+                vAxis: {
+                    title: 'Uploaded(KB)',
+                    titleTextStyle:{
+                        italic: false
+                    }
+                },
+                backgroundColor: '#ffffff'
+            };
+            var net_chart2 = new google.visualization.LineChart(document.getElementById('nuu'));
+            //NET STATS UPLOAD END
+            $req = new XMLHttpRequest();
+            var ok = 1
+            var $cpu = []
+            $req.open('GET', "{% url 'docker_box:host_stats'%}");
+            $req.onreadystatechange = function (aEvt) {
+                if ($req.readyState == 3) {
+                    if ($req.status == 200) {
+                        $response = $req.responseText
+                        $response = $response.substr(0, $response.length - 1)
+                        $response = JSON.parse("[" + $response + "]")
+                        $cpu = $response[$response.length - 1][0].cpu
+                        $cpu = $cpu.substr(0, $cpu.length - 1)
+                        $cpu = [ok, parseFloat($cpu)];
+                        data.addRows([$cpu])
+                        chart.draw(data, options) //cpuchart
+
+
+                        $mem = $response[$response.length - 1][0].memory
+                        $mem = $mem.substr(0, $mem.length - 1)
+                        $memtotal = $response[$response.length - 1][0].memTotal
+                        var memData = google.visualization.arrayToDataTable([
+                            ['Unused', 'Used'],
+                            ['Unused', parseFloat($memtotal)],
+                            ['Used', parseFloat($mem)],
+                        ]);
+                        memChart.draw(memData);
+
+                        var interface = $response[$response.length - 1][0].net_stats_down
+                        interface = interface.replace(/\'/g, '"');
+                        interface = JSON.parse(interface)
+
+                        var interface2 = $response[$response.length - 1][0].net_stats_up
+                        interface2 = interface2.replace(/\'/g, '"');
+                        interface2 = JSON.parse(interface2)
+
+                        var disk = $response[$response.length - 1][0].disk
+                        disk = disk.replace(/\'/g, '"');
+                        disk = JSON.parse(disk)
+
+                        rowz = []
+                        m = 1
+
+                        var i = 1
+                        var col = []
+                        var row = []
+                        var col2 = []
+                        var row2 = []
+                        row[0] = ok
+                        row2[0] = ok
+                        if (ok == 1) {
+                            netData.addColumn('number', '')
+                            netData2.addColumn('number', '')
+                            for (net in interface) {
+                                row[i] = parseFloat(interface[net])
+                                netData.addColumn('number', net)
+                                i++
+                            }
+                            i = 1
+                            for (net in interface2) {
+                                row2[i] = parseFloat(interface2[net])
+                                netData2.addColumn('number', net)
+                                i++
+                            }
+
+                        }
+                        else {
+                            for (net in interface) {
+                                row[i] = parseFloat(interface[net])
+                                i++
+                            }
+                            i = 1
+                            for (net in interface2) {
+                                row2[i] = parseFloat(interface2[net])
+                                i++
+                            }
+                        }
+                        rowz[0] = ['asd', 'asd']
+                        for (u in disk) {
+                            rowz[m] = [u, parseFloat(disk[u])]
+                            m++;
+                        }
+                        netData.addRows([row])
+                        net_chart.draw(netData, net_options)
+                        netData2.addRows([row2])
+                        net_chart2.draw(netData2, net_options2)
+                        var diskData = google.visualization.arrayToDataTable(rowz);
+                        memChart2.draw(diskData)
+                        ok++
+                        //NET STATS ENDS
+                        // delete variables
+                        delete interface2, interface, row2, row, col, net, i,rowz,disk
+                        delete $mem, $memtotal, $cpu;
+                        // delete variables
+                    }
+                    else {
+                        alert("Error loading page\n");
+                        window.location = ''
+                    }
+                }
+            };
+            $req.send();
+        }
+    </script>
+    {% endblock %}

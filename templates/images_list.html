@@ -1,0 +1,127 @@
+{% extends "site_base.html" %}
+{% load paginate %}
+{% load staticfiles %}
+{% load sizes %}
+{% block title %} Dockerbox Images {% endblock %}
+{% block bodycontent %}
+    <!-- main_container starts here -->
+    <div class="row marl main_container">
+        <div class="container">
+            <form class="navbar-form navbar-right">
+                    <div class="form-group">
+                        <input type="text" id="txt-image-search" class="form-control search_form" placeholder="Search Docker Hub">
+                    </div>
+                    <button type="submit" class="btn btn-default"><i class="fa fa-search sub_icon"aria-hidden="true"></i>Search</button>
+            </form>
+            <div class="search_result row"></div>
+            <h3 class="heading">Images</h3>
+            <div class="table_row">
+                <div class="table-responsive">
+                    <table class="table ">
+                        <thead>
+                        <tr>
+                            <th width="20%">Ttile</th>
+                            <th width="10%">Tag</th>
+                            <th width="10%">Image ID</th>
+                            <th width="15%">Size</th>
+                            <th width="20%">Date</th>
+                            <th width="8%">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% if per_page %}
+                            {% paginate per_page images %}
+                        {% else %}
+                            {% paginate 5 images %}
+                        {% endif %}
+                        {% for image in images %}
+                            <tr>
+                                    <td>
+                                        <a href="{% url 'docker_box:launch-image' name=image.name %}"
+                                           title="Launch a Container from this Image?">{{ image.name }}</a>
+                                    </td>
+                                    <td>{{ image.tag }}</td>
+                                    <td>{{ image.image_id|cut:'sha256:'|slice:'12' }}</td>
+                                    <td>{{ image.details.size|floatformat:2 }}MB</td>
+                                    <td>{{ image.details.created }}</td>
+                                    <td class="actions">
+                                        <!-- <a href="#edit" class="edit"><i class="fa fa-edit"></i></a> -->
+                                        <a title="Remove This Image?"
+                                           href="{% url 'docker_box:remove_image' name=image.name %}"
+                                           class="trash remove-this-image">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                    </td>
+
+                                    </tr>
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+                    {% ifequal images|length 0 %}
+                        <div class="marl row text-center">
+                        <h4>No images Found</h4>
+                    {% endifequal %}
+                    </div>
+                    <div class="marl row text-center">
+                        {% show_pages %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- main_container ends here -->
+{% endblock %}
+{% block extra_js %}
+
+    <script type="text/javascript">
+        $('#txt-image-search').keyup(function () {
+            var term = $('#txt-image-search').val();
+            $.post("{% url 'docker_box:search-images' %}", {'term': term}, function (data) {
+                if (data.length > 0) {
+                    $('.search_result').text('')
+                    for (var key in data) {
+                        $('.search_result').append(
+                                '<div class="col-lg-12 col-md-12"><div class="card" style="background:white; padding: 10px 20px; border-bottom: 1px solid #dadada;"><div class="card-block row"><div class="col-md-12"><h4 class="card-title">' + data[key].name + '</h4></div><div class="col-md-12"><div class="col-lg-8 col-md-8 col-sm-12"><p class="card-text">Description: ' + data[key].description + '</p></div><div class="col-lg-2 col-md-2 col-sm-6"><i class="fa fa-star"></i> ' + data[key].star_count + '</div><div class="col-lg-2 col-md-2 col-sm-6"><button class="btn btn_color pull">Pull</button></div><div class="'+data[key].name+'"></div></div></div></div></div>'
+                        );
+                    }
+                }
+                else {
+                    $('.search_result').html('<p class="heading text-center">No Images Found :(</p>')
+                }
+            });
+
+        });
+        timer2 = false
+        count = 0
+        function timer(){
+            if(count == 0){
+                window.location = "{%url 'docker_box:docker-images-list' %}"
+            }
+            timer2 = setTimeout(timer, 1000)
+        }
+        $("body").on("click", ".pull", function (e) {
+            e.preventDefault();
+            count += 1
+            if(!timer2){
+                timer()
+            }
+            $(this).off('click')
+            imageName = $($(this).closest('.card-block').children()[0]).text()
+            $(this).text('Pulling..');
+            this1 = $(this)
+            $.post("{% url 'docker_box:pull-image' uuid_token=uuid_token %}", {imageName: imageName},
+                function (data, status, xhr) {
+                    if (status == 'success') {
+                        if (data['status'] == 'ok') {
+                            this1.text('Pulled')
+                            count -= 1
+                        }
+                    }
+                });
+        });
+        
+    </script>
+{% endblock %}

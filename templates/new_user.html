@@ -1,0 +1,59 @@
+{% extends "site_base.html" %}
+{% load paginate %}
+{% load sizes %}
+{% block title %} Dockerbox Containers {% endblock %}
+{% block bodycontent %}
+    <div class="row marl main_container">
+        <div class="container">
+            <div class="form_container ">
+                <div class="col-xs-offset-3 col-xs-6 col-xs-offset-3">
+                    <h3 class="heading"></h3>
+                    <div class="panel panel-default form_panel">
+                        <div class="panel-content">
+                            <form action="" name="user_create" method="POST">
+                                {% csrf_token %}
+                                {% for field in form %}
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">{{ field.label }}</label>
+                                        {{ field }}
+                                    </div>
+                                {% endfor %}
+                                <div class="form-group" style="display: flex;">
+                                    <button type="submit" class="btn btn-info">{% if form.email.value %}
+                                        Update{% else %} Create {% endif %}</button>
+                                    &nbsp;&nbsp;&nbsp;
+                                    <button type="button" class="btn btn-info cancel">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block extra_js %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("form[name=user_create]").submit(function (e) {
+                e.preventDefault();
+                $form = $(this)
+                $.post("", $(this).serialize(), function (response) {
+                    $(".error").remove();
+                    if (response.error) {
+                        $.each(response.errors, function (field_name, error) {
+                            error = "<span class=\"error\">" + error + "</span>"
+                            $form.find("[name=" + field_name + "]").after(error)
+                        })
+                    }
+                    else {
+                        window.location = "{% url 'docker_box:users-list' %}"
+                    }
+                });
+            });
+            $(".cancel").click(function () {
+                window.location = "{% url 'docker_box:users-list' %}"
+            })
+        })
+    </script>
+{% endblock %}

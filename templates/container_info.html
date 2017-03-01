@@ -1,0 +1,33 @@
+{% extends "site_base.html" %}
+{% load staticfiles %}
+{% block title %} Container Details{% endblock %}
+{% block bodycontent %}
+<div class="row marl main_container">
+    <div class="container">
+        <h3 class="heading">Container Details</h3>
+        <div class="row marl chart_row">
+            <div class="col-md-6 chart_col">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div id="chart_div" style="width: 100%; height: 100%;">
+                            ID: <a href="{% url 'docker_box:container-details' container.container_id %}">{{ container.container_id }}</a>
+                            <br/>
+                            Host Name: {{ container.hostname }}
+                            <br/>
+                            IP Address: {{ container.ip.ip_addr }}
+                            <br/>
+                            Password: {{ passphrase }}
+                            <br/>
+                            Created: {{ container.created }}
+                            <br/>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <div id="curve_chart1" style="width:90%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

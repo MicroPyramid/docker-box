@@ -1,0 +1,189 @@
+{% extends "site_base.html" %}
+{% load paginate %}
+{% load sizes %}
+{% block title %} Dockerbox Containers {% endblock %}
+{% block bodycontent %}
+    <!-- main_container starts here -->
+    <div class="row marl main_container">
+        <div class="container">
+            <h3 class="heading">Create a Container</h3>
+            <div class="table_row">
+                <div class="form_row row marl">
+                    <div class="panel panel-default">
+                        <div class="panel-content">
+                            <form class='launch_form' method="POST" action=".">
+                                <div class="table_row">                                
+                                    <table class="table table-striped table-condensed ip-list">
+                                        <tr>
+                                            <td width="20%">
+                                                <div class="form-group">
+                                                    <label>Ip Address</label>
+                                                    {% if edit_container %}
+                                                        <h5>{{ edit_container.ip }}</h5>
+                                                    {% else %}
+                                                        <select class="ip_class form-control" name="ip">
+                                                            <option value="" selected="selected">--Select IP--</option>
+                                                            {% for ip in ips %}
+                                                                <option value="{{ ip.id }}" {% if edit_container %}
+                                                                {% ifequal ip.id edit_container.ip.id %} selected {% endifequal %}{% endif %}>
+                                                                {{ ip.ip_addr }}
+                                                                </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td width="20%">
+                                                <div class="form-group">
+                                                    <label>Host Name</label>
+                                                    {% if edit_container %}
+                                                        <h5>{{ edit_container.hostname }}</h5>
+                                                    {% else %}
+                                                        <input type='text' class='hostname_class form-control' name='hostname'>
+                                                    {% endif %}
+                                                </div>
+                                            </td>  
+                                            <td width="20%">
+                                                <div class="form-group">
+                                                    <label>RAM (Max {% host_ram_in_mb %}MB)</label>
+                                                    {% if edit_container %}
+                                                        <h5>{{ edit_container.memory }}</h5>
+                                                    {% else %}
+                                                        <input type="text" class="ram_class form-control" name='ram'>
+                                                    {% endif %}
+                                                </div>                                        
+                                            </td>
+                                            <td width="20%">
+                                                <div class="form-group">
+                                                    <label>CPU Cores (Max {% host_cores %})</label>
+                                                    {% if edit_container %}
+                                                        <h5>{{ edit_container.cores }}</h5>
+                                                    {% else %}
+                                                        <input type="text" class="cores_class form-control" name="cores" value="{{ edit_container.cores }}">
+                                                    {% endif %}
+                                                    
+                                                </div>
+                                            </td>
+
+                                            <!--<div class="col-md-4">
+                                              <div class="form-group">
+                                               <label>Disk (Max MB)</label>
+                                               <input type="text" class="form-control" name='disk_size'>
+                                               <input type="checkbox" class='check' name='extend'>Extend disk size when limit exceeds<br/>
+                                               <input type="checkbox" class='check' name='stop'>Shutdown container when limit exceeds
+                                               <p class="disk_size_class"></p>
+                                             </div>
+                                            </div>-->
+                                            <!--<div class="col-md-4">
+                                              <div class="form-group">
+                                               <label>Network Limit</label>
+                                               <input type="text" class="net_class form-control" id="exampleInputEmail1" name='network'>
+                                             </div>
+                                            </div>-->
+
+                                            <td width="20%">
+                                                <div class="form-group">
+                                                    <label for="exampleInputEmail1">Images</label>
+                                                    {% if edit_container %}
+                                                        <h5>{{ edit_container.image }}</h5>
+                                                    {% else %}
+                                                        <select class="image_id_class form-control" name="image">
+                                                            {% for image in images %}
+                                                                <option value="{{ image.id }}"
+                                                                    -
+                                                                    {% ifequal image.name image_name %}
+                                                                    -                        selected="selected"
+                                                                    -                      {% endifequal %}
+                                                                    ->{{ image.image_id|cut:'sha256:'|slice:'12' }}
+                                                                - {{ image.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% if edit_container %}
+                                            <input type="hidden" name="edit_field">
+                                        {% endif %}
+                                        <tr>           
+                                            <td>
+                                                <div class="form-group" {% if not request.user.is_superuser %} style='display: none;' {% endif %}>
+                                                    <label>Assignee</label>
+                                                    <select class="user_class form-control" multiple name='user'>
+                                                        {% for user in users %}
+                                                        <option value="{{ user.id }}" {% ifequal user request.user %} selected=selected {% endifequal %}>{{ user.email }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group" {% if not request.user.is_superuser %} style='display: none;' {% endif %}>
+                                                    <label>SSH User</label>
+                                                    <select class="form-control" multiple name='ssh_users'>
+                                                        {% for user in users %}
+                                                        <option value="{{ user.email }}" {% ifequal request.user user %} selected=selected {% endifequal %}>{{ user.email }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <p class='__all___class'></p>
+                                </div>
+                                <div class="text-center"><p class='api_error'></p></div>
+                                <div class="text-center">
+                                    <button type="submit" class="launch_btn btn btn-info">Launch</button>
+                                    <button type="button" class="btn btn-danger cancel">Cancel</button>
+                                </div>
+                                <br clear="all">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<form class='pf' method='post'>
+  <input type=hidden class='pi' name='passphrase'></input>
+</form>
+{% endblock %}
+{% block extra_js %}
+<script>
+$('.launch_form').submit(function (e) {
+    $('.launch_btn').text('Launching..');
+    $('.launch_btn').prop('disabled', true);
+    e.preventDefault();
+    $.post('', $('.launch_form').serialize(), function (data) {
+        $('.api_error').text('');
+        if (data['success'] =='image launched') {                                        
+            $('.pi').val(data.passphrase);
+            $('.pf').attr('action', data.url).submit();
+            {% if 'edit' in request.path %}
+                window.location = "{% url 'docker_box:container-list' %}";
+            {% endif %}
+
+        }
+        else if (data['FORM_ERRORS'] == 'true') {
+                $('.error').remove();
+                for (var key in data.form_errors) {
+                    $('.' + key + '_class').after('<p class="error">' + data.form_errors[key] + '</p>');
+                }
+                $('.launch_btn').text('Launch');
+                $('.launch_btn').prop('disabled', false);
+            }
+                            
+        else {
+        $('.api_error').text(data['ERROR']);
+    }
+    });
+});
+$('.check').on('click', function (e) {
+    $('.check').not(this).prop('checked', false);
+});
+
+$('.cancel').on('click', function(){
+    window.location = "{% url 'docker_box:docker-images-list' %}";
+});
+</script>
+{% endblock %}
+  

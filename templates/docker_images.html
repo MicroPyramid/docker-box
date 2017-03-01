@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load sizes %}
+
+{% block content %}
+    <div class="row marl search_row">
+        <div class="input-group">
+            <input id="txt-image-search" type="text" class="form-control text-filter" name="textFilter" tabindex="1"
+                   placeholder="Search docker images">
+            <div class="input-group-btn">
+                <button type="button" class="btn btn-primary search btn-icon" data-action="search">
+                    <span class="glyphicon glyphicon-search"></span>
+                </button>
+            </div>
+        </div>
+        <div class="search_result row">
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="container">
+            <div class="row">
+                <h2 class="text-center">Images</h2>
+                <div class="row">
+                    {% for image in images %}
+                        <div class="col-md-4 head_box">
+                            <div class="box">
+                                {% with image.RepoTags.0|split:":" as tags %}
+                                    <div class="box-content">
+                                        <h4 class="tag-title">
+                                            {{ tags.0 }}
+                                        </h4>
+                                        <hr/>
+                                        <p><i class="fa fa-tags" title="Tags"></i> {{ tags.1 }} </p>
+                                        <p><i class="fa fa-image"
+                                              title="Image"></i> {{ image.Id|cut:"sha256:"|slice:"12" }}</p>
+                                        <p><i class="fa fa-hdd-o" title="Size"></i> {{ image.Size|filesizeformat }}</p>
+                                        <p class="pull-left"><i class="fa fa-calendar"
+                                                                title="Created On"></i> {{ image.Created|epoch_to_datetime }}
+                                        </p>
+                    <span class="launch_button">
+                      <a href="{% url 'docker_box:launch-image' image.Id|cut:'sha256:'|slice:'12' %}"
+                         class="btn btn-primary pull-right"> Launch</a>
+                    </span>
+                                    </div>
+                                {% endwith %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+
+    <script type="text/javascript">
+        $('#txt-image-search').keyup(function () {
+            var term = $('#txt-image-search').val();
+            $(".loader").fadeIn("slow");
+            $.post("{% url 'docker_box:search-images' %}", {'term': term}, function (data) {
+                // console.log(data);
+                if (data) {
+                    $('.search_result').text('')
+                    $(".loader").fadeOut("slow");
+                    for (var key in data) {
+                        $('.search_result').append(
+                                '<div class="col-lg-12 col-md-12"><div class="card" style="background:white; padding: 10px 20px; border: 1px solid #dadada; border-radius: 5px;"><div class="card-block row"><div class="col-md-12"><h4 class="card-title">' + data[key].name + '</h4></div><div class="col-md-12"><div class="col-lg-8 col-md-8 col-sm-12"><p class="card-text">Description: ' + data[key].description + '</p></div><div class="col-lg-2 col-md-2 col-sm-6"><i class="fa fa-star"></i> ' + data[key].star_count + '</div><div class="col-lg-2 col-md-2 col-sm-6"><button class="btn btn-primary pull">Pull</button></div></div></div></div></div>'
+                        );
+                    }
+                    $(".loader").hide();
+                }
+                else {
+                    $('.search_result').text('')
+                }
+            });
+
+        });
+
+        /*PULL IMAGE*/
+        $("body").on("click", ".pull", function (e) {
+            e.preventDefault();
+            imageName = $($(this).closest('.card-block').children()[0]).text()
+            $('.search_result').text('')
+            $(".loader").fadeIn("slow");
+            $('.loadingtext').text('Downloading Image...').css({'padding-top': '10%'})
+            $.post(
+                    "{% url 'docker_box:pull-image' %}", {
+                        imageName: imageName
+                    },
+                    function (data, status, xhr) {
+                        console.log(data)
+                        if (status == 'success') {
+                            if (data['status'] == 'ok') {
+                                $(".loader").fadeOut("slow");
+                                window.location = '/images/'
+                            }
+                            else {
+                                $('.loadingtext').text('Success')
+                                console.log(data)
+                                $(".loader").fadeOut("slow");
+                                $('.search_result').text('')
+                            }
+                        }
+                        else {
+                            console.log(status)
+                        }
+                    });
+
+        });
+        /*END PULL IMAGE*/
+    </script>
+
+{% endblock %}

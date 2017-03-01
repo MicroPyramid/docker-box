@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block title %} Dockerbox Login {% endblock %}
+{% block bodycontent %}
+    <div class="container">
+        <div class="row marl login_row">
+            <div class="col-md-offset-3 col-md-6 col-md-offset-3">
+                <div class="login_block">
+                    <div class="login_form_block">
+                        <div class="welcome text-center">Docker box</div>
+                        <p class="hint">{{ message }}</p>
+                        <form method="POST" action="">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email"
+                                       name="email">
+                                <br/>
+                                <input type="password" class="form-control" id="exampleInputPassword1"
+                                       placeholder="Password" name="password">
+                            </div>
+                            <button type="submit" class="btn pull-right btn-default">Login</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

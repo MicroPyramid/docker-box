@@ -1,0 +1,77 @@
+{% extends "site_base.html" %}
+{% load paginate %}
+{% load sizes %}
+{% block title %} Dockerbox Containers {% endblock %}
+{% block bodycontent %}
+    <!-- main_container starts here -->
+    <div class="row marl main_container">
+        <div class="container">
+            <h3 class="heading">Backup Container</h3>
+            <div class="table_row">
+                <div class="form_row row marl">
+                    <div class="panel panel-default">
+                        <div class="panel-content">
+                            <form class='commit_form' method="POST" action=".">
+                                <div class="table_row">                                
+                                    <table class="table table-striped table-condensed ip-list">
+                                    <tr>
+                                        <td>
+                                            <div class="form-group">
+                                                <label>Name</label>
+                                                <input type='text' class='hostname_class form-control' name='name'>
+                                            </div>
+                                        </td>
+                                    
+                                    </tr>
+
+                                    </table>
+                                    </div>
+
+                                </div>
+                                <div class="text-center"><p class='api_error'></p></div>
+                                <div class="text-center">
+                                    <button type="submit" class="commit_btn btn btn-info">Save</button>
+                                    <button type="submit" class="btn btn-danger cancel">Cancel</button>
+                                </div>
+                                <br clear="all">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block extra_js %}
+    <script>
+        $('.commit_form').submit(function (e) {
+            $('.loader').show()
+            $('.commit_btn').text('commiting..');
+            $('.commit_btn').prop('disabled', true);
+            e.preventDefault();
+            $.post('', $('.commit_form').serialize(), function (data) {
+                if (data['error'] == false) {                                        
+                    $('.loader').hide()
+                    window.location.href = "{% url 'docker_box:container-list' %}";
+                }
+                else if (data['error'] == true) {
+                        $('.loader').show()
+                        $('.error').remove();
+                        if('form_errors' in data){
+                            for (var key in data.form_errors) {
+                                $('.' + key + '_class').after('<p class="error">' + data.form_errors[key] + '</p>');
+                            }
+                            $('.commit_btn').text('commit');
+                            $('.commit_btn').prop('disabled', false);
+                            $('.loader').hide()
+                        }
+                    }
+                                    
+            });
+        });
+        $('.check').on('click', function (e) {
+            $('.check').not(this).prop('checked', false);
+        });
+    </script>
+{% endblock %}
+  

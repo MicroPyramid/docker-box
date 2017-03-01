@@ -1,0 +1,234 @@
+{% extends "site_base.html" %}
+{% load paginate %}
+{% load sizes %}
+{% block title %} Dockerbox Containers {% endblock %}
+{% block bodycontent %}
+    <!-- main_container starts here -->
+    <div class="row marl main_container">
+        <div class="container running">
+            <h3 class="heading">Running</h3>
+            <div class="table_row">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th width="12%">Id</th>
+                            <th width="8%">HostName</th>
+                            <th width="9%">Image</th>
+                            <th width="10%">Ram</th>
+                            <th width="10%">Cores</th>
+                            <th width="12%">IP Address</th>
+                            <th width="12%">User</th>
+                            <th width="12%">Created</th>
+                            <th width="15%">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% if per_page %}
+                            {% paginate per_page active_containers_list %}
+                        {% else %}
+                            {% paginate 5 active_containers_list %}
+                        {% endif %}
+
+                        {% for container in active_containers_list %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'docker_box:container-details' container.container_id %}">{{ container.container_id }}</a>
+                                </td>
+                                <td>{{ container.hostname }}</td>
+                                <td>{{ container.image|slice:'12' }}</td>
+                                <td>{{ container.memory|floatformat:2 }}MB</td>
+                                <td>{{ container.cores }}</td>
+                                <td>{{ container.ip_addr }}</td>
+                                <td>
+                                {% if container.user.all|length == 1 %}
+                                    {% for u in container.user.all %}
+                                        {{ u }}
+                                    {% endfor %}
+                                {% else %}
+                                    <select>
+                                        <option>--Users Assigned--</option>
+                                        {% for u in container.user.all %}
+                                        <option>{{ u }}</option>                                        {% endfor %}
+                                    </select>
+                                {% endif %}
+                                </td>
+                                <td>{{ container.created }}</td>
+                                <td class="actions">
+                                    {% if container.user == container.image.user or request.user.is_superuser %}
+                                        <a href="{% url 'docker_box:edit_container' container_id=container.container_id %}"
+                                        class="edit-this-container"><i class="fa fa-edit"></i></a>
+                                    {% endif %}
+                                    <a href="{% url 'docker_box:restart-container' container_id=container.container_id %}"
+                                       class="restart-this-container"><i class="fa fa-refresh"></i></a>
+                                    <a href="{% url 'docker_box:stop-container' container_id=container.container_id %}"
+                                       class="stop-this-container"><i class="fa fa-stop"></i></a>
+                                    <a href="{% url 'docker_box:backup_container' container_id=container.container_id %}"
+                                       class="backup_container"><i class="fa fa-hdd-o"></i></a>
+                                    <a title="SSH Access"
+                                       href="{% url 'docker_box:ssh_access' container_id=container.container_id %}">
+                                       <i class="fa fa-key"></i>
+                                    </a>
+                                </td>
+
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    {% ifequal active_containers_list|length 0 %}
+                        <div class="marl row text-center">
+                        <h4>No Active Containers...</h4>
+                    {% endifequal %}
+                    </div>
+                    <div class="marl row text-center">
+                        {% show_pages %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row marl main_container">
+        <div class="container idle">
+            <h3 class="heading">Idle</h3>
+            <div class="table_row">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th width="12%">Id</th>
+                            <th width="8%">HostName</th>
+                            <th width="9%">Image</th>
+                            <th width="10%">Ram</th>
+                            <th width="10%">Cores</th>
+                            <th width="12%">IP Address</th>
+                            <th width="12%">User</th>
+                            <th width="12%">Created</th>
+                            <th width="15%">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% if per_page %}
+                            {% paginate per_page idle_containers_list %}
+                        {% else %}
+                            {% paginate 5 idle_containers_list %}
+                        {% endif %}
+                        {% for container in idle_containers_list %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'docker_box:container-details' container.container_id %}">{{ container.container_id }}</a>
+                                </td>
+                                <td>{{ container.hostname }}</td>
+                                <td>{{ container.image.name }}</td>
+                                <td>{{ container.memory|floatformat:2 }} MB</td>
+                                <td>{{ container.cores }}</td>
+                                <td>{{ container.ip.ip_addr }}</td>
+                                <td>
+                                {% if container.user.all|length == 1 %}
+                                    {% for u in container.user.all %}
+                                        {{ u }}
+                                    {% endfor %}
+                                {% else %}
+                                    <select>
+                                        <option>--Users Assigned--</option>
+                                        {% for u in container.user.all %}
+                                        <option>{{ u }}</option>                                        {% endfor %}
+                                    </select>
+                                {% endif %}
+                                </td>
+                                <td>{{ container.created }}</td>
+                                <td class="actions">
+                                    <a href="{% url 'docker_box:start-container' container_id=container.container_id %}"
+                                       class="start-this-container"><i class="fa fa-play"></i></a>
+                                    <a href="{% url 'docker_box:backup_container' container_id=container.container_id %}"
+                                       class="backup_container"><i class="fa fa-hdd-o"></i></a>
+                                    {% if container.user == container.image.user or request.user.is_superuser %}
+                                      <a href="{% url 'docker_box:edit_container' container_id=container.container_id %}"
+                                        class="edit-this-container"><i class="fa fa-edit"></i></a>
+                                      <a href="{% url 'docker_box:delete_container' container_id=container.container_id %}"
+                                        class="delete-this-container"><i class="fa fa-trash"></i></a>
+                                    {% endif %}
+                                    <a title="SSH Access"
+                                       href="{% url 'docker_box:ssh_access' container_id=container.id %}">
+                                       <i class="fa fa-key"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    {% ifequal idle_containers_list|length 0 %}
+                        <div class="marl row text-center">
+                        <h4>No Idle Containers...</h4>
+                    {% endifequal %}
+                    </div>
+                    <div class="marl row text-center">
+                        {% show_pages %}
+                    </div>
+
+
+                </div>
+                <h4 class='passwd'> {% if launched_container_id %}{{ launched_container_id }} Password:  {{ passphrase }}{% endif %}</h4>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- main_container ends here -->
+
+{% endblock %}
+{% block extra_js %}
+    <script type="text/javascript">
+        $('body').on('click', '.start-this-container', function (e) {
+            e.preventDefault();
+            $('.loader').show()
+            // console.log($(this))
+            URL = $(this).context.pathname
+            $.get(URL, function (data, status, xhr) {
+                if (data['success'] == 'started' || data['success'] == 'Already Started') {
+                    $('.loader').hide()
+                    window.location = "{% url 'docker_box:container-list' %}"
+                }
+                else {
+                    $('.loader').hide()
+                    alert(data['ERROR'])
+                    window.location = "{% url 'docker_box:container-list' %}"
+                }
+            });
+        });
+        $('body').on('click', '.stop-this-container', function (e) {
+            e.preventDefault();
+            $('.loader').show()
+            // console.log($(this))
+            URL = $(this).context.pathname
+            $.get(URL, function (data, status, xhr) {
+                if (data['success'] == 'stopped' || data['success'] == 'Already Stopped') {
+                    $('.loader').hide()
+                    window.location = "{% url 'docker_box:container-list' %}"
+                }
+                else {
+                    $('.loader').hide()
+                    alert(data['ERROR'])
+                    window.location = "{% url 'docker_box:container-list' %}"
+                }
+            });
+        });
+        $('body').on('click', '.restart-this-container', function (e) {
+            e.preventDefault();
+            $('.loader').show()
+            // console.log($(this))
+            URL = $(this).context.pathname
+            $.get(URL, function (data, status, xhr) {
+                if (data['success'] == 'restarted') {
+                    $('.loader').hide()
+                    window.location = "{% url 'docker_box:container-list' %}"
+                }
+                else {
+                    $('.loader').hide()
+                    alert(data['ERROR'])
+                    window.location = "{% url 'docker_box:container-list' %}"
+                }
+            });
+        });
+    </script>
+
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "site_base.html" %}
+{% load staticfiles %}
+{% block title %} Remove Image {% endblock %}
+{% block bodycontent %}
+<div class="row marl main_container">
+    <div class="container">
+        <h3 class="heading">Image Details</h3>
+        <div class="row marl chart_row">
+            <div class="col-md-6 chart_col">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div id="chart_div" style="width: 100%; height: 100%;">
+                            Name: {{ image.name }}
+                            <br/>
+                            Size: {{ image.size }}&nbsp;MB
+                            <br/>
+                            Created: {{ image.created }}
+                            <br/>
+                            <br/>
+                            <form method='post' action='' class='pf'>
+                                Password: <input type='password' name='passphrase'></input>
+                                &nbsp;&nbsp;<input class='remove-this-image' type='submit' value='Remove'>
+                                <br/>
+                                <p class='pe error text-danger'></pe>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <div id="curve_chart1" style="width:90%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$('.pf').submit(function(e) {
+    e.preventDefault();
+    $.post('', $(this).serialize(), function(data) {
+        if (data['success'] == 'Deleted') {
+            window.location = "{{ request.META.HTTP_REFERER }}"
+        }
+        else if (data['perror'] == true) {
+			$('.pe').text('Wrong Password');
+		}
+        else {
+            alert(data['ERROR'])
+                window.location = "{{ request.META.HTTP_REFERER }}"
+        }
+    });
+});
+</script>
+{% endblock %}
