@@ -11,7 +11,7 @@ Why docker-box?
   - Web based terminal session for containers.
 
 ### Installation
-[![Everything Is AWESOME](static/images/dbox1.png)](https://www.youtube.com/watch?v=7tKSz5OkrA0 "DockerBox")
+[![Everything Is AWESOME](static/images/dbox.png)](https://www.youtube.com/watch?v=YCjkZLBNxUQ "DockerBox")
 
 Currently supports:
    - Ubuntu 16.04, 14.04
