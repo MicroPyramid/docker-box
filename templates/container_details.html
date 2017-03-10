@@ -4,7 +4,7 @@
 {% load sizes %}
 {% block title %} {{ container.Name|remove_slash }}'s Dashboard {% endblock %}
 {% block bodycontent %}
-    <link href="{% static 'css/xterm.css' %}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/xterm/2.3.2/xterm.css" rel="stylesheet">
     <br/>
     <div class="row marl main_container">
       <div class="container">
@@ -228,7 +228,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script type="text/javascript" src="{% static 'js/xterm.js' %}"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/xterm/2.3.2/xterm.js"></script>
 <script type="text/javascript">
 //function restart_stats(){
 //  $req.abort();
