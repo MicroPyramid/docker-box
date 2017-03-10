@@ -26,6 +26,8 @@ Why docker-box?
   - Web based terminal session for containers.
     - Get a quick access to your system using web based terminal.
 
+
+
 ### Installation
 Run:
 ```sh
@@ -37,7 +39,12 @@ Currently supports:
    - Debian Jessie, Wheezy
    - CentOS 7, 6
 
+
+
+### DockerBox Workflow.
+
 [![Everything Is AWESOME](static/images/dbox1.png)](https://www.youtube.com/watch?v=7tKSz5OkrA0 "DockerBox")
+
 
 License
 ----
