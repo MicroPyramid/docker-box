@@ -10,22 +10,26 @@ Why docker-box?
   - Takes care of networking.
     - Just provide your desired IP, docker box will set it up for you.
     - Uses MACVLAN network which doesn’t mess up your iptables.<Paste>
+
   - User management.
     - Create users and assign them to your virtual machine like container.
 	- SSH access for user to the container.
+
   - Host and containers statistics.
     - Graphical view for your host and running containers.
 	- Includes CPU, RAM, NETWORK and DISK.
+
   - Create backups of containers.
     - Just give a name and your backup will be ready in a couple of seconds.
 	- Use these images as base to extend functionalities.
+
   - Web based terminal session for containers.
     - Get a quick access to your system using web based terminal.
 
 ### Installation
 Run:
 ```sh
-$ sudo curl -sSL https://raw.githubusercontent.com/MicroPyramid/docker-box/master/install.sh | bash
+sudo curl -o /tmp/install.sh https://raw.githubusercontent.com/MicroPyramid/docker-box/master/install.sh && sudo chmod +x /tmp/install.sh && sudo bash /tmp/install.sh
 ```
 
 Currently supports:
