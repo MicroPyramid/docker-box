@@ -43,7 +43,7 @@ Currently supports:
 
 ### DockerBox Workflow.
 
-[![Everything Is AWESOME](static/images/dbox1.png)](https://www.youtube.com/watch?v=7tKSz5OkrA0 "DockerBox")
+[![Everything Is AWESOME](static/images/dbox.png)](https://www.youtube.com/watch?v=7tKSz5OkrA0 "DockerBox")
 
 
 License
