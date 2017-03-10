@@ -149,8 +149,7 @@ install(){
             git pull origin master &&
             yes | pip install -r requirements.txt &&
     
-            mkdir dockit/migrations && touch dockit/migrations/__init__.py &&
-            python manage.py makemigrations && python manage.py migrate &&
+            python manage.py migrate &&
             python manage.py createsuperuser &&
     
             if [ "$dist_version" = "xenial" ]
@@ -181,9 +180,11 @@ install(){
             create_macvlan_network &&
             create_bridge_network &&
 
+            echo ' ' &&
             printf "Enter Host IP Address: " &&
             read ip_addr &&
             sed -i "s/\(HOST_IP_ADDR\s=\s\).*/\1'$ip_addr'/g" $project_dir/docker_box/docker_box/settings.py &&
+            sed -i "s/\(ALLOWED_HOSTS\s=\s\).*/\1['$ip_addr']/g" $project_dir/docker_box/docker_box/settings.py &&
 
             printf "Enter a port for docker_box: " &&
             read port &&
@@ -210,8 +211,7 @@ install(){
             git pull origin master &&
             yes | pip install -r requirements.txt &&
     
-            mkdir dockit/migrations && touch dockit/migrations/__init__.py &&
-            python manage.py makemigrations && python manage.py migrate &&
+            python manage.py migrate &&
             python manage.py createsuperuser &&
     
             if [ "$dist_version" = "jessie" ]
@@ -285,8 +285,7 @@ install(){
 
             yes | pip install -r requirements.txt &&
 
-            mkdir dockit/migrations && touch dockit/migrations/__init__.py &&
-            python manage.py makemigrations && python manage.py migrate &&
+            python manage.py migrate &&
             python manage.py createsuperuser &&
             
             if [ "$dist_version" = "7" ]
