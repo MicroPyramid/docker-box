@@ -1,15 +1,20 @@
 # docker-box
 
-Running full blown OS as containers will suffice most of the virtual machine needs. So why not use containers just like regular virtual machines? There are security risks with this, they aren’t meant to run multiple services and moreover they are not reliable for storing data, however when you need to deploy a test environment or any environment where you care less about security and more about time, you can bring up full blown OS containers within 5-10 seconds instead of setting up virtual machines and you get all the benefits of containers like instantaneous backups(commits), easy start and stop and the awesome feature of pausing your container etc.
+### Reason for creating this tool:
+Consider a server with multiple IP Addresses, we create virtual machines, assign IP addresses to these machines, provide access to users etc.., most of the time the purpose of these virtual machines is to deploy applications eigther for testing or production.
+In the case of testing we aren't bothered about security or reliability of the host on which the application is running, so all that matters is time to setup testing environment, make backups, resetting the environment and so on.
+So in this scenerio running docker containers from images which has init system is a best substitute for virtual machines.
+docker-box is created to implement above use case using django for web interface and docker enginer api to manage docker.
 
-Why docker-box?
+
+### Features:
   - UI to run containers easily.
     - Minimal UI focusing on content.
     - Run a container in just 5 seconds.
 
   - Takes care of networking.
     - Just provide your desired IP, docker box will set it up for you.
-    - Uses MACVLAN network which doesn’t mess up your iptables.<Paste>
+    - Uses MACVLAN network which doesn’t mess up your iptables.
 
   - User management.
     - Create users and assign them to your virtual machine like container.
