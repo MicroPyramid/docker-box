@@ -48,7 +48,7 @@ Currently supports:
 
 ### DockerBox Workflow Video.
 
-[![Everything Is AWESOME](static/images/dbox.png)](https://www.youtube.com/watch?v=7tKSz5OkrA0 "DockerBox")
+[![Everything Is AWESOME](static/images/dbox.png)](https://www.youtube.com/watch?v=YCjkZLBNxUQ "DockerBox")
 
 
 License

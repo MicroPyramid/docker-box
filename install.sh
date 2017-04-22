@@ -1,5 +1,6 @@
 #!/bin/sh
 
+#TODO replace if condition with test to handle errors using status codes.
 env_dir="$HOME/docker_box/db_env" &&
 project_dir="$HOME/docker_box" &&
 docker_api_port=2375 &&
@@ -87,7 +88,7 @@ dist_info(){
 
 create_macvlan_network(){
     echo ' ' &&
-    echo '########### Creating MACVLAN network(individual IP adresses) ###########' &&
+    echo '########### Creating MACVLAN network(individual IP adresses)(https://github.com/MicroPyramid/docker-box/wiki/Network) ###########' &&
     printf "Enter Subnet(eg: 88.99.102.64/26): " &&
     read subnet &&
     printf "Enter gateway(eg: 88.99.102.65): " &&
@@ -99,7 +100,7 @@ create_macvlan_network(){
 
 create_bridge_network(){
     echo ' ' &&
-    echo "########### Creating bridge network(IP's from external subnet) ###########" &&
+    echo "########### Creating bridge network(IP's from external subnet)(https://github.com/MicroPyramid/docker-box/wiki/Network) ###########" &&
     printf "Enter Subnet(eg: 88.99.114.16/28): " &&
     read subnet2 &&
     printf "Enter gateway(eg: 88.99.114.17): " &&
@@ -147,6 +148,9 @@ install(){
     
             git init && git remote add origin 'https://github.com/MicroPyramid/docker-box' &&
             git pull origin master &&
+            #sed replacement pattern considers ampersand, forward slash and backslash(if seperator)  as special chars.
+            secret_key=`python -c 'import random; print("".join([random.SystemRandom().choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^*(-_=+)") for i in range(50)]))'`
+            sed -i "s/\(SECRET_KEY\s=\s\).*/\1'$secret_key'/g" $project_dir/docker_box/docker_box/settings.py &&
             yes | pip install -r requirements.txt &&
     
             python manage.py migrate &&
@@ -177,8 +181,21 @@ install(){
                 exit 0
             fi &&
     
-            create_macvlan_network &&
-            create_bridge_network &&
+            echo ' ' &&
+            printf '############## Network Setup(https://github.com/MicroPyramid/docker-box/wiki/Network) #############' &&
+            echo ' ' &&
+            printf "Are there extra IP's"' with MAC addresses(y/n): ' &&
+            read has_mac &&
+            if [ "$has_mac" = "y" ]
+            then
+                create_macvlan_network
+            fi &&
+            printf "Are there extra IP's"' without MAC addresses(y/n): ' &&
+            read has_no_mac &&
+            if [ "$has_no_mac" = "y" ]
+            then
+                create_bridge_network
+            fi &&
 
             echo ' ' &&
             printf "Enter Host IP Address: " &&
@@ -209,6 +226,9 @@ install(){
     
             git init && git remote add origin 'https://github.com/MicroPyramid/docker-box' &&
             git pull origin master &&
+            #sed replacement pattern considers ampersand, forward slash and backslash(if seperator)  as special chars.
+            secret_key=`python -c 'import random; print("".join([random.SystemRandom().choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^*(-_=+)") for i in range(50)]))'`
+            sed -i "s/\(SECRET_KEY\s=\s\).*/\1'$secret_key'/g" $project_dir/docker_box/docker_box/settings.py &&
             yes | pip install -r requirements.txt &&
     
             python manage.py migrate &&
@@ -282,7 +302,9 @@ install(){
             #TODO update git for centos6
             git init && git remote add origin 'https://github.com/MicroPyramid/docker-box' &&
             git pull origin master &&
-
+            #sed replacement pattern considers ampersand, forward slash and backslash(if seperator)  as special chars.
+            secret_key=`python -c 'import random; print("".join([random.SystemRandom().choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^*(-_=+)") for i in range(50)]))'`
+            sed -i "s/\(SECRET_KEY\s=\s\).*/\1'$secret_key'/g" $project_dir/docker_box/docker_box/settings.py &&
             yes | pip install -r requirements.txt &&
 
             python manage.py migrate &&
