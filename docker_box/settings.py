@@ -6,7 +6,7 @@ BROKER_URL = 'django://'
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = 'dynamic_secret_key'
+SECRET_KEY = 's6tb**69y889azix^_hsxc^*0&vt*thix2jso4@^1)i!!wby0w'
 
 DEBUG = False
 
