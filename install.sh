@@ -223,6 +223,8 @@ install(){
     
             git init && git remote add origin 'https://github.com/MicroPyramid/docker-box' &&
             git pull origin master &&
+            secret_key=`python -c 'import random; print("".join([random.SystemRandom().choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)]))'`
+            sed -i "s/\(SECRET_KEY\s=\s\).*/\1'$secret_key'/g" $project_dir/docker_box/docker_box/settings.py &&
             yes | pip install -r requirements.txt &&
     
             python manage.py migrate &&
@@ -296,7 +298,8 @@ install(){
             #TODO update git for centos6
             git init && git remote add origin 'https://github.com/MicroPyramid/docker-box' &&
             git pull origin master &&
-
+            secret_key=`python -c 'import random; print("".join([random.SystemRandom().choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)]))'`
+            sed -i "s/\(SECRET_KEY\s=\s\).*/\1'$secret_key'/g" $project_dir/docker_box/docker_box/settings.py &&
             yes | pip install -r requirements.txt &&
 
             python manage.py migrate &&
