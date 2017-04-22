@@ -1,5 +1,6 @@
 #!/bin/sh
 
+#TODO replace if condition with test to handle errors using status codes.
 env_dir="$HOME/docker_box/db_env" &&
 project_dir="$HOME/docker_box" &&
 docker_api_port=2375 &&
@@ -181,7 +182,8 @@ install(){
             fi &&
     
             echo ' ' &&
-            printf '############## Network Setup, goto https://github.com/MicroPyramid/docker-box/wiki/Network for more info.'
+            printf '############## Network Setup(https://github.com/MicroPyramid/docker-box/wiki/Network) #############' &&
+            echo ' ' &&
             printf "Are there extra IP's"' with MAC addresses(y/n): ' &&
             read has_mac &&
             if [ "$has_mac" = "y" ]
