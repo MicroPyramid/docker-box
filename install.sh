@@ -181,13 +181,13 @@ install(){
     
             echo ' ' &&
             printf '############## Network Setup, goto https://github.com/MicroPyramid/docker-box/wiki/Network for more info.'
-            printf 'Are there extra IP's with MAC addresses(y/n): ' &&
+            printf "Are there extra IP's"' with MAC addresses(y/n): ' &&
             read has_mac &&
             if [ "$has_mac" = "y"]
             then
                 create_macvlan_network
             fi &&
-            printf 'Are there extra IP's without MAC addresses(y/n): ' &&
+            printf "Are there extra IP's"' without MAC addresses(y/n): ' &&
             read has_no_mac &&
             if [ "$has_no_mac" = "y" ]
             then
