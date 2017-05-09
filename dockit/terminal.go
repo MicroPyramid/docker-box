@@ -28,7 +28,7 @@ var container_id = os.Args[4]
 var port = flag.String("port", go_server_port, "Port for server")
 var host = flag.String("host", host_ip_addr+":"+host_port, "Docker host")
 
-var sid_regex = regexp.MustCompile(`.*sessionid=(?P<sessionid>.*)\n.*`)
+var sid_regex = regexp.MustCompile(`.*sessionid=(.*?)\n.*`)
 
 func main() {
 	flag.Parse()
@@ -47,7 +47,7 @@ func mid(next websocket.Handler) http.Handler {
         }
         sid_find := sid_regex.FindStringSubmatch(string(requestDump))
         sid := sid_find[1]
-        auth_out, auth_err := exec.Command("/bin/sh", "-c", "./manage.py ncp --container_id "+container_id+" --sessionid "+sid).Output()
+        auth_out, auth_err := exec.Command("python", "manage.py",  "ncp", container_id, sid).Output()
         if auth_err != nil {
             fmt.Printf("%s", auth_err)
             os.Exit(3)
