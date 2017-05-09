@@ -17,9 +17,8 @@ class Command(BaseCommand):
             uid = session.get_decoded().get('_auth_user_id')
             user = User.objects.get(id=uid)
             container = Container.objects.get(container_id=options['container_id'][0])
-        except ObjectDoesNotExist:
-            #raise HttpResponseForbidden
-            pass
+        except ObjectDoesNotExist as e:
+            raise HttpResponseForbidden
         else:
             if user.is_superuser or container.user == user:
                 pass
