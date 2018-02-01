@@ -55,3 +55,9 @@ License
 ----
 
 MIT
+
+
+Contact
+----
+
+[Micropyramid](https://github.com/MicroPyramid/docker-box).
