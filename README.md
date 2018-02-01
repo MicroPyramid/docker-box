@@ -60,4 +60,4 @@ MIT
 Contact
 ----
 
-[Micropyramid](https://github.com/MicroPyramid/docker-box).
+[Micropyramid](https://micropyramid.com/docker-consulting).
