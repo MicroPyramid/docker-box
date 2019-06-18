@@ -5,12 +5,12 @@ appdirs==1.4.3
 Babel==2.3.4
 billiard==3.3.0.23
 celery==3.1.23
-Django==1.11.15
+Django==1.11.21
 django-celery==3.1.17
 django-simple-pagination==1.1.4
 docutils==0.13.1
 imagesize==0.7.1
-Jinja2==2.9.5
+Jinja2==2.10.1
 kombu==3.0.35
 lazy-object-proxy==1.2.2
 MarkupSafe==0.23
