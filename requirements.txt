@@ -4,7 +4,7 @@ anyjson==0.3.3
 appdirs==1.4.3
 Babel==2.3.4
 billiard==3.3.0.23
-celery==3.1.23
+celery==5.2.2
 Django==1.11.21
 django-celery==3.1.17
 django-simple-pagination==1.1.4
